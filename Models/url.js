@@ -10,6 +10,11 @@ const URLSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "users",
+    required: false, // false rakho taake purane bina-login URLs bhi chal sakein
+  },
 }, { timestamps: true });
 
 export const URLs = mongoose.model("urls", URLSchema);
