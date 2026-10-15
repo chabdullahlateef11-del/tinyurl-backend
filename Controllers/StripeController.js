@@ -1,5 +1,5 @@
 import stripe from "../Utils/stripe.js";
-import { Users as User} from "../Models/user.js";
+import { Users as User } from "../Models/user.js";
 import { WebhookEvent } from "../Models/WebhookEvent.js";
 
 const PRICE_MAP = {
@@ -128,6 +128,13 @@ export const handleWebhook = async (req, res) => {
         const subscription = event.data.object;
         const userId = subscription.metadata?.userId;
         const priceId = subscription.items.data[0]?.price?.id;
+
+        // Naye Stripe API version mein current_period_end ab subscription item ke andar hoti hai,
+        // subscription object ke top-level pe nahi — isliye dono jagah check kar rahe hain
+        const periodEndTimestamp =
+          subscription.current_period_end ||
+          subscription.items?.data?.[0]?.current_period_end;
+
         const plan =
           subscription.status === "active" || subscription.status === "trialing"
             ? "pro"
@@ -136,7 +143,9 @@ export const handleWebhook = async (req, res) => {
         const update = {
           stripeSubscriptionId: subscription.id,
           subscriptionStatus: subscription.status,
-          currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+          currentPeriodEnd: periodEndTimestamp
+            ? new Date(periodEndTimestamp * 1000)
+            : null,
           cancelAtPeriodEnd: subscription.cancel_at_period_end,
           priceId,
           plan,
