@@ -20,7 +20,7 @@ app.use(cors());
 app.post(
   "/api/stripe/webhook",
   express.raw({ type: "application/json" }),
-  handleStripeWebhook
+  handleWebhook
 );
 
 app.use(express.json());
